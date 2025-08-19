@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AlpineJs Tabs</title>
-    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="./css/style.css" />
 
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
     <script
@@ -26,19 +26,19 @@
                   id: 1,
                   name: 'Dashboard',
                   link: '/dashboard',
-                  page: '/pages/dashboard.html'
+                  page: './pages/dashboard.html'
               },
               {
                   id: 2,
                   name: 'Product List',
                   link: '/product-list',
-                  page: '/pages/product-list.html'
+                  page: './pages/product-list.html'
               },
               {
                   id: 3,
                   name: 'Orders List',
                   link: '/orders-list',
-                  page: '/pages/orders-list.html'
+                  page: './pages/orders-list.html'
               }
             ]
           }
@@ -49,18 +49,18 @@
             id: 1,
             name: 'Dashboard',
             link: '/dashboard',
-            page: '/pages/dashboard.html',
+            page: './pages/dashboard.html',
             active: true
           }
         ],
 
         content: '',
         routes: {
-          '/': '/pages/dashboard.html',
-          '/dashboard': '/pages/dashboard.html',
+          '/': './pages/dashboard.html',
+          '/dashboard': './pages/dashboard.html',
           '/index.html': 'index.html',
-          '/orders-list': '/pages/orders-list.html',
-          '/product-list': '/pages/product-list.html'
+          '/orders-list': './pages/orders-list.html',
+          '/product-list': './pages/product-list.html'
         },
 
         resetActiveTabs:function(){
