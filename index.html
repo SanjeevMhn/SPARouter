@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AlpineJs Tabs</title>
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+
+  </head>
+  <body>
+    <div
+      class="base-layout"
+      x-data="{
+        menus: [
+          {
+            id: 1, 
+            name: 'Home',
+            subMenus: [
+              {
+                  id: 1,
+                  name: 'Dashboard',
+                  link: '/dashboard',
+                  page: '/pages/dashboard.html'
+              },
+              {
+                  id: 2,
+                  name: 'Product List',
+                  link: '/product-list',
+                  page: '/pages/product-list.html'
+              },
+              {
+                  id: 3,
+                  name: 'Orders List',
+                  link: '/orders-list',
+                  page: '/pages/orders-list.html'
+              }
+            ]
+          }
+        ],
+
+        tabs: [
+          {
+            id: 1,
+            name: 'Dashboard',
+            link: '/dashboard',
+            page: '/pages/dashboard.html',
+            active: true
+          }
+        ],
+
+        content: '',
+        routes: {
+          '/': '/pages/dashboard.html',
+          '/dashboard': '/pages/dashboard.html',
+          '/index.html': 'index.html',
+          '/orders-list': '/pages/orders-list.html',
+          '/product-list': '/pages/product-list.html'
+        },
+
+        resetActiveTabs:function(){
+          this.tabs = this.tabs.map((tab) => {
+            return {
+              ...tab,
+              active: false
+            }
+          })
+        },
+
+        addTab:function(menu){
+          this.resetActiveTabs()
+          if(this.tabs.filter(tab => tab.id == menu.id).length == 0){
+            this.tabs.push({
+              ...menu,
+              active: true
+            })
+          }else{
+            this.tabs = this.tabs.map(tab => {
+              if(tab.id == menu.id){
+                return {
+                  ...tab,
+                  active:true
+                }
+              }
+              return tab
+            })
+            console.log(this.tabs)
+          }
+        },
+
+        async selectTab(menu){
+          this.resetActiveTabs()
+          window.history.pushState({},'',menu.link)
+          await this.onHandleChange()
+          this.tabs = this.tabs.map(tab => {
+            if(tab.id == menu.id){
+              return {
+                ...tab,
+                active: true
+              }
+            }
+            return tab
+          })
+        },
+
+        async closeTab(menu){
+          this.resetActiveTabs()
+          let tabIndex = this.tabs.findIndex(tab => tab.id == menu.id) - 1
+          if(tabIndex < 0){
+            this.tabs[tabIndex + 1] = {
+              ...this.tabs[tabIndex + 1],
+              active: true
+            }
+            window.history.pushState({},'',this.tabs[tabIndex + 1].link)
+            await this.onHandleChange()
+          }else{
+            this.tabs[tabIndex] = {
+              ...this.tabs[tabIndex],
+              active: true
+            }
+            window.history.pushState({},'',this.tabs[tabIndex].link)
+            await this.onHandleChange()
+          }
+          this.tabs = this.tabs.filter((tab) => tab.id !== menu.id)
+
+        },
+
+        async onRouteChange(event){
+          event.preventDefault()
+          window.history.pushState({},'',event.target.href)
+          await this.onHandleChange()
+          let menu = this.menus[0].subMenus.find(me => me.link == window.location.pathname)
+          this.addTab(menu)
+        },
+
+        async onHandleChange(){
+          let path = window.location.pathname
+          let route = this.routes[path]
+          let html = await fetch(route).then((data) => data.text())
+          this.content = html
+        },
+
+        async init(){
+          window.onpopstate = await this.onHandleChange()
+          window.route = await this.onRouteChange()
+        }
+      }"
+    >
+      <nav class="main-nav">
+        <a href="/" class="brand-link">Company Name</a>
+        <ul class="nav-list">
+          <template x-for="menu in menus" :key="menu.id">
+            <li class="nav-item">
+              <p class="menu-label" x-text="menu.name"></p>
+              <span class="icon-container">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                  <path
+                    d="M201.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 338.7 54.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"
+                  />
+                </svg>
+              </span>
+              <ul class="dropdown-list">
+                <template x-for="sub in menu.subMenus" :key="sub.id">
+                  <li class="">
+                    <a x-bind:href="sub.link" class="d-item" x-text="sub.name" @click="onRouteChange(event)"></a>
+                  </li>
+                </template>
+              </ul>
+            </li>
+          </template>
+        </ul>
+      </nav>
+      <ul class="tabs-container">
+        <template x-for="tab in tabs" :key="tab.id">
+          <li class="tab-item" :class="tab.active ? 'active' : ''" @click.prevent="selectTab(tab)">
+            <p class="tab-name" x-text="tab.name"></p>
+            <button
+              type="button"
+              class="icon-container"
+              style="--color: '#000'"
+              x-show="tab.name !== 'Dashboard'"
+              @click.stop="closeTab(tab)"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+                <path
+                  d="M183.1 137.4C170.6 124.9 150.3 124.9 137.8 137.4C125.3 149.9 125.3 170.2 137.8 182.7L275.2 320L137.9 457.4C125.4 469.9 125.4 490.2 137.9 502.7C150.4 515.2 170.7 515.2 183.2 502.7L320.5 365.3L457.9 502.6C470.4 515.1 490.7 515.1 503.2 502.6C515.7 490.1 515.7 469.8 503.2 457.3L365.8 320L503.1 182.6C515.6 170.1 515.6 149.8 503.1 137.3C490.6 124.8 470.3 124.8 457.8 137.3L320.5 274.7L183.1 137.4z"
+                />
+              </svg>
+            </button>
+          </li>
+        </template>
+      </ul>
+      <main class="main-content" x-html="content">
+      </main>
+    </div>
+  </body>
+  
+</html>
